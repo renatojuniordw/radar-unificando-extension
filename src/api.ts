@@ -1,10 +1,5 @@
 import { API_BASE } from './config';
-import type {
-  AnalyzeResponse,
-  AtsResult,
-  FeedbackResponse,
-  RewriteResponse,
-} from './types';
+import type { AnalyzeResponse, AtsResult, FeedbackResponse } from './types';
 
 /** Cliente HTTP do backend. Cada método mapeia erros para códigos conhecidos. */
 
@@ -27,26 +22,6 @@ export async function analyzeJob(
     return { error: (data as { error?: string }).error || 'UNKNOWN' };
   }
   return data as AtsResult;
-}
-
-export async function rewriteSection(
-  token: string,
-  section: string,
-  jobDescription: string,
-): Promise<RewriteResponse> {
-  const res = await fetch(`${API_BASE}/extension/rewrite`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ section, jobDescription }),
-  });
-
-  if (res.status === 401) return { error: 'NOT_CONNECTED' };
-
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    return { error: (data as { error?: string }).error || 'UNKNOWN' };
-  }
-  return data as { rewritten: string };
 }
 
 export async function sendFeedback(

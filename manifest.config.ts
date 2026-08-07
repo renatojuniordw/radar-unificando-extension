@@ -8,9 +8,11 @@ export default defineManifest({
     'Analisa a vaga aberta na página e mostra dicas de ajuste do currículo para passar em triagens de ATS.',
   action: {
     default_title: 'Analisar vaga',
-    default_popup: 'src/popup.html',
   },
-  permissions: ['identity', 'storage', 'activeTab'],
+  side_panel: {
+    default_path: 'src/sidepanel.html',
+  },
+  permissions: ['identity', 'storage', 'activeTab', 'sidePanel', 'scripting'],
   host_permissions: ['<all_urls>'],
   background: {
     service_worker: 'src/background.ts',

@@ -43,19 +43,15 @@ export type AnalyzeErrorCode =
   | 'RATE_LIMITED'
   | 'UNKNOWN';
 
-/** Resposta do /api/extension/rewrite. */
-export type RewriteResponse = { rewritten: string } | { error: string };
-
 /** Resposta do /api/extension/feedback. */
 export type FeedbackResponse = { ok: true } | { error: string };
 
-/** Mensagens trocadas entre content/popup e o service worker. */
+/** Mensagens trocadas entre side panel, content script e o service worker. */
 export type ExtensionMessage =
   | { type: 'ANALYZE'; jobDescription: string }
-  | { type: 'REWRITE'; section: string; jobDescription: string }
   | { type: 'FEEDBACK'; rating: boolean; comment?: string }
   | { type: 'GET_STATUS' }
   | { type: 'CONNECT' }
   | { type: 'DISCONNECT' }
-  | { type: 'OPEN_PANEL' }
-  | { type: 'TRIGGER' };
+  | { type: 'GET_PAGE_TEXT' } // side panel → background → content
+  | { type: 'PAGE_CHANGED' }; // content → side panel
