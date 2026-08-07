@@ -33,12 +33,9 @@ function Panel({ jobDescription }: { jobDescription: string }) {
     | { status: 'error'; code: string; message: string }
   >({ status: 'loading' });
 
-  useEffect(() => {
-    if (!jobDescription.trim()) {
-      setState({ status: 'error', code: 'NO_TEXT', message: 'Não encontramos texto nesta página.' });
-      return;
-    }
-    chrome.runtime.sendMessage({ type: 'ANALYZE', jobDescription }, (res: AnalyzeResponse) => {
+  function runAnalysis(text: string) {
+    setState({ status: 'loading' });
+    chrome.runtime.sendMessage({ type: 'ANALYZE', jobDescription: text }, (res: AnalyzeResponse) => {
       if (!res) {
         setState({ status: 'error', code: 'UNKNOWN', message: 'Sem resposta da extensão.' });
         return;
@@ -49,6 +46,14 @@ function Panel({ jobDescription }: { jobDescription: string }) {
       }
       setState({ status: 'done', result: res });
     });
+  }
+
+  useEffect(() => {
+    if (!jobDescription.trim()) {
+      setState({ status: 'error', code: 'NO_TEXT', message: 'Não encontramos texto nesta página.' });
+      return;
+    }
+    runAnalysis(jobDescription);
   }, [jobDescription]);
 
   return (
@@ -62,7 +67,9 @@ function Panel({ jobDescription }: { jobDescription: string }) {
       </div>
       <div className="body">
         {state.status === 'loading' && <p className="muted">Analisando vaga…</p>}
-        {state.status === 'error' && <ErrorView code={state.code} message={state.message} />}
+        {state.status === 'error' && (
+          <ErrorView code={state.code} message={state.message} onRetry={() => runAnalysis(jobDescription)} />
+        )}
         {state.status === 'done' && <ResultView result={state.result} />}
       </div>
     </div>
@@ -84,13 +91,13 @@ function errorMessage(code: string): string {
   }
 }
 
-function ErrorView({ code, message }: { code: string; message: string }) {
+function ErrorView({ code, message, onRetry }: { code: string; message: string; onRetry: () => void }) {
   const isNotConnected = code === 'NOT_CONNECTED';
   return (
     <div>
       <p className="error">{message}</p>
       {isNotConnected && (
-        <button className="primary" onClick={() => chrome.runtime.sendMessage({ type: 'ANALYZE', jobDescription: '' })}>
+        <button className="primary" onClick={onRetry}>
           Conectar conta
         </button>
       )}
