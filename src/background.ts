@@ -1,8 +1,16 @@
-import { getToken, setToken, clearToken } from './storage';
-import { SITE_URL, API_BASE, CONNECT_PATH } from './config';
-import type { AnalyzeResponse } from './types';
+import { analyzeJob, rewriteSection, sendFeedback } from './api';
+import { getOrConnectToken, connect, disconnect } from './connect';
+import { setScoreBadge, clearBadge } from './badge';
+import { getToken } from './storage';
+import { addHistory, getCachedAnalysis, setCachedAnalysis } from './storage';
+import type {
+  AnalyzeResponse,
+  ExtensionMessage,
+  FeedbackResponse,
+  RewriteResponse,
+} from './types';
 
-// Trigger manual: clicar no ícone pede ao content script da aba ativa para analisar.
+// Clique no ícone pede ao content script da aba ativa para analisar.
 chrome.action.onClicked.addListener((tab) => {
   if (!tab.id) return;
   chrome.tabs.sendMessage(tab.id, { type: 'TRIGGER' }).catch(() => {
@@ -10,50 +18,101 @@ chrome.action.onClicked.addListener((tab) => {
   });
 });
 
-chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  if (msg?.type === 'ANALYZE') {
-    handleAnalyze(String(msg.jobDescription ?? ''))
-      .then(sendResponse)
-      .catch((err) => sendResponse({ error: String(err) }));
-    return true; // resposta assíncrona
-  }
-});
+async function getActiveTab(): Promise<{ url: string; title: string } | null> {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.url) return null;
+  return { url: tab.url, title: tab.title ?? tab.url };
+}
 
 async function handleAnalyze(jobDescription: string): Promise<AnalyzeResponse> {
-  let token = await getToken();
-  if (!token) {
-    token = await connect();
-    if (!token) return { error: 'NOT_CONNECTED' };
+  const tab = await getActiveTab();
+
+  if (tab) {
+    const cached = await getCachedAnalysis(tab.url);
+    if (cached) return cached;
   }
 
-  const res = await fetch(`${API_BASE}/extension/analyze`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ jobDescription }),
-  });
+  const token = await getOrConnectToken();
+  if (!token) return { error: 'NOT_CONNECTED' };
 
-  if (res.status === 401) {
-    await clearToken();
-    return { error: 'NOT_CONNECTED' };
-  }
+  const result = await analyzeJob(token, jobDescription);
+  if ('error' in result) return result;
 
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const message = (data as { error?: string }).error;
-    if (res.status === 429) return { error: 'RATE_LIMITED' };
-    if (res.status === 400) return { error: 'NO_RESUME' };
-    return { error: message || 'UNKNOWN' };
+  await setScoreBadge(result.analysis.score);
+  if (tab) {
+    await setCachedAnalysis(tab.url, result);
+    await addHistory({
+      url: tab.url,
+      title: tab.title,
+      score: result.analysis.score,
+      date: new Date().toISOString(),
+    });
   }
-  return data as AnalyzeResponse;
+  return result;
 }
 
-/** Conecta a conta via launchWebAuthFlow e guarda o token recebido. */
-async function connect(): Promise<string | null> {
-  const redirectUri = chrome.identity.getRedirectURL();
-  const url = `${SITE_URL}${CONNECT_PATH}?redirect_uri=${encodeURIComponent(redirectUri)}`;
-  const responseUrl = await chrome.identity.launchWebAuthFlow({ url, interactive: true });
-  if (!responseUrl) return null;
-  const token = new URL(responseUrl).searchParams.get('token');
-  if (token) await setToken(token);
-  return token;
+async function handleRewrite(section: string, jobDescription: string): Promise<RewriteResponse> {
+  const token = await getOrConnectToken();
+  if (!token) return { error: 'NOT_CONNECTED' };
+  return rewriteSection(token, section, jobDescription);
 }
+
+async function handleFeedback(rating: boolean, comment?: string): Promise<FeedbackResponse> {
+  const token = await getOrConnectToken();
+  if (!token) return { error: 'NOT_CONNECTED' };
+  return sendFeedback(token, rating, comment);
+}
+
+chrome.runtime.onMessage.addListener((msg: ExtensionMessage, _sender, sendResponse) => {
+  switch (msg?.type) {
+    case 'ANALYZE':
+      handleAnalyze(String(msg.jobDescription ?? ''))
+        .then(sendResponse)
+        .catch((err) => sendResponse({ error: String(err) }));
+      return true;
+
+    case 'REWRITE':
+      handleRewrite(String(msg.section ?? ''), String(msg.jobDescription ?? ''))
+        .then(sendResponse)
+        .catch((err) => sendResponse({ error: String(err) }));
+      return true;
+
+    case 'FEEDBACK':
+      handleFeedback(Boolean(msg.rating), msg.comment)
+        .then(sendResponse)
+        .catch((err) => sendResponse({ error: String(err) }));
+      return true;
+
+    case 'GET_STATUS':
+      getToken()
+        .then((token) => sendResponse({ connected: Boolean(token) }))
+        .catch(() => sendResponse({ connected: false }));
+      return true;
+
+    case 'CONNECT':
+      connect()
+        .then((token) => sendResponse({ connected: Boolean(token) }))
+        .catch(() => sendResponse({ connected: false }));
+      return true;
+
+    case 'DISCONNECT':
+      disconnect()
+        .then(() => clearBadge())
+        .then(() => sendResponse({ ok: true }))
+        .catch(() => sendResponse({ ok: false }));
+      return true;
+
+    case 'OPEN_PANEL':
+      chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
+        if (tab?.id) {
+          chrome.tabs.sendMessage(tab.id, { type: 'TRIGGER' }).catch(() => {});
+        }
+        sendResponse({ ok: true });
+      });
+      return true;
+
+    default:
+      sendResponse({ error: 'UNKNOWN' });
+      break;
+  }
+});

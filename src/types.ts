@@ -10,6 +10,13 @@ export interface AtsHeuristic {
   score: number;
 }
 
+export interface SkillScore {
+  skill: string;
+  score: number; // 0-100
+  present: boolean;
+  suggestion: string;
+}
+
 export interface AtsAnalysis {
   score: number;
   summary: string;
@@ -17,6 +24,7 @@ export interface AtsAnalysis {
   missingKeywords: string[];
   formattingIssues: string[];
   recommendations: string[];
+  skillScores: SkillScore[];
 }
 
 export interface AtsResult {
@@ -34,3 +42,20 @@ export type AnalyzeErrorCode =
   | 'NO_RESUME'
   | 'RATE_LIMITED'
   | 'UNKNOWN';
+
+/** Resposta do /api/extension/rewrite. */
+export type RewriteResponse = { rewritten: string } | { error: string };
+
+/** Resposta do /api/extension/feedback. */
+export type FeedbackResponse = { ok: true } | { error: string };
+
+/** Mensagens trocadas entre content/popup e o service worker. */
+export type ExtensionMessage =
+  | { type: 'ANALYZE'; jobDescription: string }
+  | { type: 'REWRITE'; section: string; jobDescription: string }
+  | { type: 'FEEDBACK'; rating: boolean; comment?: string }
+  | { type: 'GET_STATUS' }
+  | { type: 'CONNECT' }
+  | { type: 'DISCONNECT' }
+  | { type: 'OPEN_PANEL' }
+  | { type: 'TRIGGER' };

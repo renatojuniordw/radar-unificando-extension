@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import type { AnalyzeResponse, AtsResult } from './types';
+import type { AnalyzeResponse, AtsResult, RewriteResponse } from './types';
+import { formatResultToText } from './format';
+import { copyText } from './clipboard';
 
 const PANEL_HOST_ID = 'radar-unificando-panel-host';
 
@@ -18,6 +20,11 @@ export function renderPanel(jobDescription: string): void {
 
   currentRoot = createRoot(shadow);
   currentRoot.render(<Panel jobDescription={jobDescription} />);
+}
+
+/** Indica se o painel está aberto (usado pela re-análise automática em SPA). */
+export function isPanelOpen(): boolean {
+  return Boolean(document.getElementById(PANEL_HOST_ID));
 }
 
 function closePanel(): void {
@@ -70,7 +77,7 @@ function Panel({ jobDescription }: { jobDescription: string }) {
         {state.status === 'error' && (
           <ErrorView code={state.code} message={state.message} onRetry={() => runAnalysis(jobDescription)} />
         )}
-        {state.status === 'done' && <ResultView result={state.result} />}
+        {state.status === 'done' && <ResultView result={state.result} jobDescription={jobDescription} />}
       </div>
     </div>
   );
@@ -105,12 +112,69 @@ function ErrorView({ code, message, onRetry }: { code: string; message: string; 
   );
 }
 
-function ResultView({ result }: { result: AtsResult }) {
+function ResultView({ result, jobDescription }: { result: AtsResult; jobDescription: string }) {
   const { analysis, heuristics } = result;
+  const [copied, setCopied] = useState(false);
+  const [feedbackSent, setFeedbackSent] = useState<boolean | null>(null);
+  const [rewriteInput, setRewriteInput] = useState('');
+  const [rewriteResult, setRewriteResult] = useState('');
+  const [rewriteLoading, setRewriteLoading] = useState(false);
+  const [rewriteError, setRewriteError] = useState('');
+
+  async function copyTips() {
+    const ok = await copyText(formatResultToText(result));
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }
+
+  function sendFeedback(rating: boolean) {
+    if (feedbackSent !== null) return;
+    setFeedbackSent(rating);
+    chrome.runtime.sendMessage({ type: 'FEEDBACK', rating });
+  }
+
+  function runRewrite() {
+    if (!rewriteInput.trim()) return;
+    setRewriteLoading(true);
+    setRewriteError('');
+    setRewriteResult('');
+    chrome.runtime.sendMessage(
+      { type: 'REWRITE', section: rewriteInput, jobDescription },
+      (res: RewriteResponse) => {
+        setRewriteLoading(false);
+        if (!res || 'error' in res) {
+          setRewriteError('Não foi possível reescrever. Tente novamente.');
+          return;
+        }
+        setRewriteResult(res.rewritten);
+      },
+    );
+  }
+
   return (
     <div>
+      {result.cached && <p className="muted">Resultado em cache.</p>}
       <ScoreBar score={analysis.score} />
       {analysis.summary && <p className="summary">{analysis.summary}</p>}
+
+      {analysis.skillScores?.length > 0 && (
+        <Section title="Score por skill">
+          {analysis.skillScores.map((s) => (
+            <div key={s.skill} className="skill">
+              <div className="skill-row">
+                <span>{s.skill}</span>
+                <span className={s.present ? 'ok' : 'bad'}>{s.score}/100</span>
+              </div>
+              <div className="score-track">
+                <div className="score-fill" style={{ width: `${Math.max(0, Math.min(100, s.score))}%` }} />
+              </div>
+              {s.suggestion && <p className="skill-suggestion">{s.suggestion}</p>}
+            </div>
+          ))}
+        </Section>
+      )}
 
       {analysis.strengths.length > 0 && (
         <Section title="Pontos fortes">
@@ -141,6 +205,44 @@ function ResultView({ result }: { result: AtsResult }) {
           </ul>
         </Section>
       )}
+
+      <div className="actions">
+        <button className="ghost" onClick={copyTips}>
+          {copied ? 'Copiado!' : 'Copiar dicas'}
+        </button>
+        <div className="feedback">
+          <span className="muted">Útil?</span>
+          <button
+            className={feedbackSent === true ? 'active' : ''}
+            onClick={() => sendFeedback(true)}
+            disabled={feedbackSent !== null}
+          >
+            Útil
+          </button>
+          <button
+            className={feedbackSent === false ? 'active' : ''}
+            onClick={() => sendFeedback(false)}
+            disabled={feedbackSent !== null}
+          >
+            Não
+          </button>
+        </div>
+      </div>
+
+      <Section title="Reescrever trecho">
+        <textarea
+          className="rewrite-input"
+          value={rewriteInput}
+          onChange={(e) => setRewriteInput(e.target.value)}
+          placeholder="Cole um trecho do currículo para reescrever com as keywords da vaga…"
+          rows={3}
+        />
+        <button className="primary" onClick={runRewrite} disabled={rewriteLoading}>
+          {rewriteLoading ? 'Reescrevendo…' : 'Reescrever com IA'}
+        </button>
+        {rewriteError && <p className="error">{rewriteError}</p>}
+        {rewriteResult && <pre className="rewrite-result">{rewriteResult}</pre>}
+      </Section>
     </div>
   );
 }
@@ -214,8 +316,32 @@ const styles = `
   .score-label { color: #94a3b8; font-size: 12px; }
   .score-track { flex: 1; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; }
   .score-fill { height: 100%; background: #ccff00; }
+  .skill { margin-bottom: 8px; }
+  .skill-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px; }
+  .skill-suggestion { margin: 2px 0 0; color: #94a3b8; font-size: 11px; }
+  .actions { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; gap: 8px; }
+  .feedback { display: flex; align-items: center; gap: 6px; }
+  .feedback button {
+    background: #1e293b; color: #cbd5e1; border: 1px solid #334155; cursor: pointer;
+    padding: 4px 8px; font-family: inherit; font-size: 11px; border-radius: 4px;
+  }
+  .feedback button.active { background: #ccff00; color: #020617; border-color: #ccff00; }
+  .feedback button:disabled { opacity: 0.5; cursor: default; }
+  button.ghost {
+    background: none; color: #ccff00; border: 1px solid #ccff00; cursor: pointer;
+    padding: 6px 10px; font-family: inherit; text-transform: uppercase; font-size: 11px; font-weight: 700;
+  }
   button.primary {
     margin-top: 8px; background: #ccff00; color: #020617; border: none; font-weight: 900;
     padding: 8px 12px; cursor: pointer; font-family: inherit; text-transform: uppercase; font-size: 11px;
+  }
+  button.primary:disabled { opacity: 0.5; cursor: default; }
+  .rewrite-input {
+    width: 100%; background: #0b1220; color: #e2e8f0; border: 1px solid #334155;
+    font-family: inherit; font-size: 12px; padding: 8px; resize: vertical;
+  }
+  .rewrite-result {
+    margin-top: 8px; padding: 8px; background: #0b1220; border: 1px solid #334155;
+    white-space: pre-wrap; color: #cbd5e1; font-size: 12px;
   }
 `;
