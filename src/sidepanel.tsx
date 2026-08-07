@@ -19,6 +19,7 @@ function SidePanel() {
   const [state, setState] = useState<PanelState>({ status: 'loading' });
   const [currentUrl, setCurrentUrl] = useState('');
   const [history, setHistory] = useState<AnalysisHistoryEntry[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const lastTextRef = useRef('');
 
   function runAnalysis(text: string) {
@@ -125,7 +126,15 @@ function SidePanel() {
 
       <footer className="footer">
         <div className="history-head">
-          <h2>Histórico</h2>
+          <button
+            className="history-toggle"
+            onClick={() => setHistoryOpen((open) => !open)}
+            aria-expanded={historyOpen}
+          >
+            <span className={`chevron ${historyOpen ? 'open' : ''}`}>▸</span>
+            <h2>Histórico</h2>
+            {history.length > 0 && <span className="history-count">{history.length}</span>}
+          </button>
           <div className="footer-actions">
             {connected ? (
               <button className="link" onClick={disconnect}>
@@ -143,18 +152,21 @@ function SidePanel() {
             )}
           </div>
         </div>
-        {history.length === 0 ? (
-          <p className="muted">Nenhuma análise ainda.</p>
-        ) : (
-          <ul className="history">
-            {history.map((h) => (
-              <li key={h.url}>
-                <span className="score">{h.score}</span>
-                <span className="title">{h.title}</span>
-              </li>
-            ))}
-          </ul>
-        )}
+        {historyOpen &&
+          (history.length === 0 ? (
+            <p className="muted">Nenhuma análise ainda.</p>
+          ) : (
+            <div className="history-container">
+              <ul className="history">
+                {history.map((h) => (
+                  <li key={h.url}>
+                    <span className="score">{h.score}</span>
+                    <span className="title">{h.title}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
       </footer>
     </div>
   );
@@ -426,8 +438,20 @@ const styles = `
   button.primary:disabled { opacity: 0.5; cursor: default; }
   .error-view { padding: 6px 0; }
   .history-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-  .history-head h2 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .history-toggle {
+    display: flex; align-items: center; gap: 6px; background: none; border: none; cursor: pointer;
+    padding: 0; font-family: inherit;
+  }
+  .history-toggle h2 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .history-toggle:hover h2 { color: var(--accent-dark); }
+  .chevron { display: inline-block; font-size: 10px; color: var(--muted); transition: transform 0.15s ease; }
+  .chevron.open { transform: rotate(90deg); }
+  .history-count {
+    background: #eef0f3; color: var(--muted); border-radius: 999px; font-size: 10px;
+    padding: 1px 7px; font-weight: 600;
+  }
   .footer-actions { display: flex; gap: 10px; }
+  .history-container { height: 200px; overflow-y: auto; margin-top: 4px; }
   .history { margin: 0; padding: 0; list-style: none; }
   .history li { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
   .history .score { font-weight: 800; color: var(--accent-dark); min-width: 24px; }
