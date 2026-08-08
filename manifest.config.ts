@@ -2,12 +2,16 @@ import { defineManifest } from '@crxjs/vite-plugin';
 
 export default defineManifest({
   manifest_version: 3,
-  name: 'Radar Unificando — Análise de Vaga',
+  name: 'Radar Unificando — Análise de Vagas e Score ATS',
+  short_name: 'Radar ATS',
   version: '0.1.0',
+  author: { email: 'contato@radarunificando.com.br' },
+  homepage_url: 'https://radarunificando.com.br/extensao',
   description:
-    'Analisa a vaga aberta na página e mostra dicas de ajuste do currículo para passar em triagens de ATS.',
+    'Analise vagas no Gupy, LinkedIn e InHire em tempo real. Veja seu score ATS, palavras-chave de IA faltando no currículo e receba dicas personalizadas para passar em triagens automatizadas.',
   action: {
-    default_title: 'Analisar vaga',
+    default_title: 'Analisar vaga no Radar Unificando',
+    default_icon: 'public/icons/icon48.png',
   },
   side_panel: {
     default_path: 'src/sidepanel.html',
@@ -33,5 +37,6 @@ export default defineManifest({
     16: 'public/icons/icon16.png',
     48: 'public/icons/icon48.png',
     128: 'public/icons/icon128.png',
+    512: 'public/icons/icon512.png',
   },
 });
