@@ -20,7 +20,9 @@ Reaproveita a análise ATS do backend do Radar Unificando
 - **Badge de score** — mostra o score no ícone da extensão.
 - **Histórico local** — últimas análises salvas em `chrome.storage.local`
   (seção colapsável com altura fixa).
-- **Cache por URL** — evita re-analisar a mesma vaga por 30 minutos.
+- **Cache por hash do conteúdo** — evita re-analisar a mesma vaga por 30
+  minutos (chave é o hash do texto extraído, não a URL — SPAs trocam a vaga
+  sem mudar o endereço).
 - **Copiar dicas** — exporta o resultado como texto formatado.
 - **Feedback de utilidade** — avaliação (sim/não) enviada ao backend.
 - **Extratores por site** — LinkedIn, Gupy, InHire e um extrator genérico.
@@ -42,7 +44,7 @@ notifica o painel quando o conteúdo muda.
 npm install
 npm run dev        # build de desenvolvimento (carrega em chrome://extensions)
 npm run build      # build de produção em dist/
-npm test           # testes (extração de texto)
+npm test           # testes (API, extração, formatação)
 npm run icons      # regenera os ícones placeholder
 ```
 
@@ -82,9 +84,12 @@ src/
     spa.ts           →   detecção de mudança de URL em SPAs.
   sidepanel/         → UI do Side Panel (análise, conexão, histórico).
     index.tsx        →   entry React.
+    SidePanel.tsx    →   layout principal do painel.
+    useAnalysis.ts   →   hook de estado: análise, conexão e re-análise automática.
     components/      →   ErrorView, ResultView, Section.
     format.ts        →   formata o resultado para texto (copiar dicas).
     clipboard.ts     →   helper de cópia com fallback.
+    utils.ts         →   helpers (truncar URL, mensagens de erro por código).
     styles.css       →   estilos do painel.
   shared/            → Compartilhado entre os contextos.
     config.ts        →   URL do site e da API (via VITE_SITE_URL).

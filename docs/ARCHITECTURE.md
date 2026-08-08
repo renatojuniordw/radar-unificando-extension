@@ -42,7 +42,10 @@ Mensagens trocadas via `chrome.runtime.sendMessage` / `chrome.tabs.sendMessage`
 |--------|------------------|
 | `background/index.ts` | Abre o side panel no clique do ícone (`setPanelBehavior`), roteia mensagens, chama a API, aplica o badge, grava histórico/cache (chaveado por hash do texto) e injeta o content script sob demanda. |
 | `content/index.ts` | Extrai o texto com `extractJobText` e responde `GET_PAGE_TEXT`. Detecta mudanças de URL (via `content/spa.ts`) e de conteúdo (via MutationObserver) e notifica com `PAGE_CHANGED`, só quando o texto extraído muda. Tem guarda anti-duplicação (`window.__radarContentLoaded`). |
-| `sidepanel/index.tsx` | UI do painel: análise, status de conexão, histórico colapsável e botão "Reanalisar". Re-analisa em `tabs.onActivated`, `tabs.onUpdated` (URL) e `PAGE_CHANGED`. |
+| `sidepanel/index.tsx` | Entry React que monta o `SidePanel`. |
+| `sidepanel/SidePanel.tsx` | Layout do painel: header (status de conexão, "Reanalisar"), URL atual, corpo (loading/erro/resultado) e footer (histórico colapsável, conectar/desconectar, limpar). |
+| `sidepanel/useAnalysis.ts` | Hook de estado: análise, conexão e **re-análise automática** em `tabs.onActivated`, `tabs.onUpdated` (URL), `PAGE_CHANGED` e `chrome.storage.onChanged` (mudança de token). Descarta respostas obsoletas via `requestIdRef`. |
+| `sidepanel/utils.ts` | `truncateUrl` e `errorMessage` (mensagens pt-BR por código de erro). |
 | `content/extract.ts` + `content/extractors/` | Fachada `extractJobText(doc, url)` que delega ao extrator do site (`JobExtractor`), com fallback para o genérico. Novos sites são adicionados sem alterar os existentes (OCP). |
 | `background/api.ts` | Cliente HTTP do backend (`analyzeJob`, `sendFeedback`), mapeando erros para códigos conhecidos. |
 | `background/connect.ts` | Conexão via `chrome.identity.launchWebAuthFlow` e persistência do token. |
