@@ -1,8 +1,8 @@
 import { useAnalysis } from './useAnalysis';
 import { truncateUrl } from './utils';
-import { styles } from './styles';
 import ErrorView from './components/ErrorView';
 import ResultView from './components/ResultView';
+import './styles.css';
 
 function SidePanel() {
   const {
@@ -20,7 +20,6 @@ function SidePanel() {
 
   return (
     <div className="sidepanel">
-      <style>{styles}</style>
       <header className="header">
         <div className="brand">
           <span className="logo">R</span>
@@ -51,7 +50,11 @@ function SidePanel() {
           </div>
         )}
         {state.status === 'error' && (
-          <ErrorView code={state.code} message={state.message} onRetry={() => analyzeActiveTab(true)} />
+          <ErrorView
+            code={state.code}
+            message={state.message}
+            onRetry={state.code === 'NOT_CONNECTED' ? connect : () => analyzeActiveTab(true)}
+          />
         )}
         {state.status === 'done' && <ResultView result={state.result} />}
       </div>

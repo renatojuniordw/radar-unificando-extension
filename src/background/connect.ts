@@ -8,8 +8,23 @@ export async function getOrConnectToken(): Promise<string | null> {
   return connect();
 }
 
-/** Conecta a conta via launchWebAuthFlow e guarda o token recebido. */
-export async function connect(): Promise<string | null> {
+let connectPromise: Promise<string | null> | null = null;
+
+/**
+ * Conecta a conta via launchWebAuthFlow e guarda o token recebido.
+ * Single-flight: chamadas concorrentes compartilham o mesmo fluxo de login,
+ * evitando abrir várias janelas de autenticação de uma vez.
+ */
+export function connect(): Promise<string | null> {
+  if (!connectPromise) {
+    connectPromise = doConnect().finally(() => {
+      connectPromise = null;
+    });
+  }
+  return connectPromise;
+}
+
+async function doConnect(): Promise<string | null> {
   const redirectUri = chrome.identity.getRedirectURL();
   const url = `${SITE_URL}${CONNECT_PATH}?redirect_uri=${encodeURIComponent(redirectUri)}`;
   try {

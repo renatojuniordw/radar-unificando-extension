@@ -60,8 +60,9 @@ npm run icons      # regenera os ícones placeholder
 
 ## Configuração
 
-A URL do site fica em `src/shared/config.ts` (`SITE_URL`). Em produção, aponte
-para o domínio real do Radar Unificando.
+A URL do site é lida de `VITE_SITE_URL` (padrão: `http://localhost:11010`, veja
+`.env.example`). Em produção, defina `VITE_SITE_URL` com o domínio real do Radar
+Unificando (ex.: em `.env.local`).
 
 ## Estrutura
 
@@ -84,8 +85,9 @@ src/
     components/      →   ErrorView, ResultView, Section.
     format.ts        →   formata o resultado para texto (copiar dicas).
     clipboard.ts     →   helper de cópia com fallback.
+    styles.css       →   estilos do painel.
   shared/            → Compartilhado entre os contextos.
-    config.ts        →   URL do site e da API.
+    config.ts        →   URL do site e da API (via VITE_SITE_URL).
     types/           →   tipos de domínio, mensagens e contrato da API.
     storage/         →   persistência local (token, histórico, cache).
 ```

@@ -1,8 +1,10 @@
+import type { AnalyzeErrorCode } from '../shared/types';
+
 export function truncateUrl(url: string, max = 60): string {
   return url.length > max ? `${url.slice(0, max)}…` : url;
 }
 
-export function errorMessage(code: string): string {
+export function errorMessage(code: AnalyzeErrorCode): string {
   switch (code) {
     case 'NOT_CONNECTED':
       return 'Sua conta não está conectada. Clique em "Conectar" no rodapé para continuar.';

@@ -17,14 +17,25 @@ export default defineManifest({
     default_path: "src/sidepanel/index.html",
   },
   permissions: ["identity", "storage", "activeTab", "sidePanel", "scripting"],
-  host_permissions: ["<all_urls>"],
+  host_permissions: [
+    "https://*.linkedin.com/*",
+    "https://*.gupy.io/*",
+    "https://*.inhire.app/*",
+    "https://*.inhire.com/*",
+    "http://localhost:11010/*",
+  ],
   background: {
     service_worker: "src/background/index.ts",
     type: "module",
   },
   content_scripts: [
     {
-      matches: ["<all_urls>"],
+      matches: [
+        "https://*.linkedin.com/*",
+        "https://*.gupy.io/*",
+        "https://*.inhire.app/*",
+        "https://*.inhire.com/*",
+      ],
       js: ["src/content/index.ts"],
       run_at: "document_idle",
     },

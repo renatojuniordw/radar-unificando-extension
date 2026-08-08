@@ -5,4 +5,4 @@ export {
   clearHistory,
   type AnalysisHistoryEntry,
 } from './history';
-export { getCachedAnalysis, setCachedAnalysis, clearCache } from './cache';
+export { getCachedAnalysis, setCachedAnalysis, clearCache, hashText } from './cache';

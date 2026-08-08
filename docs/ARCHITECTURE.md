@@ -40,7 +40,7 @@ Mensagens trocadas via `chrome.runtime.sendMessage` / `chrome.tabs.sendMessage`
 
 | Módulo | Responsabilidade |
 |--------|------------------|
-| `background/index.ts` | Abre o side panel no clique do ícone (`setPanelBehavior`), roteia mensagens, chama a API, aplica o badge, grava histórico/cache e injeta o content script sob demanda. |
+| `background/index.ts` | Abre o side panel no clique do ícone (`setPanelBehavior`), roteia mensagens, chama a API, aplica o badge, grava histórico/cache (chaveado por hash do texto) e injeta o content script sob demanda. |
 | `content/index.ts` | Extrai o texto com `extractJobText` e responde `GET_PAGE_TEXT`. Detecta mudanças de URL (via `content/spa.ts`) e de conteúdo (via MutationObserver) e notifica com `PAGE_CHANGED`, só quando o texto extraído muda. Tem guarda anti-duplicação (`window.__radarContentLoaded`). |
 | `sidepanel/index.tsx` | UI do painel: análise, status de conexão, histórico colapsável e botão "Reanalisar". Re-analisa em `tabs.onActivated`, `tabs.onUpdated` (URL) e `PAGE_CHANGED`. |
 | `content/extract.ts` + `content/extractors/` | Fachada `extractJobText(doc, url)` que delega ao extrator do site (`JobExtractor`), com fallback para o genérico. Novos sites são adicionados sem alterar os existentes (OCP). |
@@ -48,7 +48,7 @@ Mensagens trocadas via `chrome.runtime.sendMessage` / `chrome.tabs.sendMessage`
 | `background/connect.ts` | Conexão via `chrome.identity.launchWebAuthFlow` e persistência do token. |
 | `background/badge.ts` | Badge de score no ícone (verde/amarelo/vermelho por faixa). |
 | `content/spa.ts` | `onUrlChange(cb)`: patcheia `history.pushState/replaceState` + `popstate` + polling. |
-| `shared/storage/` | `token.ts`, `history.ts`, `cache.ts` — persistência em `chrome.storage.local`. |
+| `shared/storage/` | `token.ts`, `history.ts`, `cache.ts` — persistência em `chrome.storage.local`. O cache é chaveado por `hashText` (djb2) do texto da vaga, não pela URL (instável em SPAs). |
 | `sidepanel/format.ts` | `formatResultToText` para o botão "Copiar dicas". |
 | `sidepanel/clipboard.ts` | `copyText` com fallback para `document.execCommand`. |
 

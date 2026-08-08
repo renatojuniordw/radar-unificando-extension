@@ -1,7 +1,14 @@
 import { analyzeJob, sendFeedback } from './api';
-import { getOrConnectToken, connect, disconnect } from './connect';
+import { getOrConnectToken, disconnect } from './connect';
 import { setScoreBadge, clearBadge } from './badge';
-import { getToken, addHistory, getCachedAnalysis, setCachedAnalysis } from '../shared/storage';
+import {
+  getToken,
+  clearToken,
+  addHistory,
+  getCachedAnalysis,
+  setCachedAnalysis,
+  hashText,
+} from '../shared/storage';
 import type { AnalyzeResponse, ExtensionMessage, FeedbackResponse } from '../shared/types';
 
 // Clique no ícone abre o side panel automaticamente.
@@ -53,22 +60,28 @@ async function getPageTextFromActiveTab(): Promise<{ text: string; url: string }
 }
 
 async function handleAnalyze(jobDescription: string): Promise<AnalyzeResponse> {
-  const tab = await getActiveTab();
+  const cacheKey = hashText(jobDescription);
 
-  if (tab) {
-    const cached = await getCachedAnalysis(tab.url);
-    if (cached) return cached;
+  const cached = await getCachedAnalysis(cacheKey);
+  if (cached) {
+    await setScoreBadge(cached.analysis.score);
+    return cached;
   }
 
-  const token = await getOrConnectToken();
+  const token = await getToken();
   if (!token) return { error: 'NOT_CONNECTED' };
 
   const result = await analyzeJob(token, jobDescription);
-  if ('error' in result) return result;
+  if ('error' in result) {
+    if (result.error === 'NOT_CONNECTED') await clearToken();
+    return result;
+  }
 
   await setScoreBadge(result.analysis.score);
+  await setCachedAnalysis(cacheKey, result);
+
+  const tab = await getActiveTab();
   if (tab) {
-    await setCachedAnalysis(tab.url, result);
     await addHistory({
       url: tab.url,
       title: tab.title,
@@ -80,9 +93,11 @@ async function handleAnalyze(jobDescription: string): Promise<AnalyzeResponse> {
 }
 
 async function handleFeedback(rating: boolean, comment?: string): Promise<FeedbackResponse> {
-  const token = await getOrConnectToken();
+  const token = await getToken();
   if (!token) return { error: 'NOT_CONNECTED' };
-  return sendFeedback(token, rating, comment);
+  const result = await sendFeedback(token, rating, comment);
+  if ('error' in result && result.error === 'NOT_CONNECTED') await clearToken();
+  return result;
 }
 
 chrome.runtime.onMessage.addListener((msg: ExtensionMessage, _sender, sendResponse) => {
@@ -106,7 +121,7 @@ chrome.runtime.onMessage.addListener((msg: ExtensionMessage, _sender, sendRespon
       return true;
 
     case 'CONNECT':
-      connect()
+      getOrConnectToken()
         .then((token) => sendResponse({ connected: Boolean(token) }))
         .catch(() => sendResponse({ connected: false }));
       return true;
