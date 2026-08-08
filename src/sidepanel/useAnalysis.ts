@@ -74,15 +74,27 @@ export function useAnalysis() {
     const onMessage = (msg: { type?: string }) => {
       if (msg?.type === 'PAGE_CHANGED' && isActive()) analyzeActiveTab(false);
     };
+    // Rede de segurança: reflete qualquer mudança de token na UI, mesmo que
+    // ela não tenha vindo da resposta do próprio connect().
+    const onStorageChanged = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      areaName: string
+    ) => {
+      if (areaName !== 'local' || !('extensionToken' in changes)) return;
+      refreshStatus();
+      if (changes.extensionToken.newValue) analyzeActiveTab(true);
+    };
 
     chrome.tabs.onActivated.addListener(onActivated);
     chrome.tabs.onUpdated.addListener(onUpdated);
     chrome.runtime.onMessage.addListener(onMessage);
+    chrome.storage.onChanged.addListener(onStorageChanged);
 
     return () => {
       chrome.tabs.onActivated.removeListener(onActivated);
       chrome.tabs.onUpdated.removeListener(onUpdated);
       chrome.runtime.onMessage.removeListener(onMessage);
+      chrome.storage.onChanged.removeListener(onStorageChanged);
     };
   }, []);
 
