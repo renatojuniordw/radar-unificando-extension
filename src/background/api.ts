@@ -1,5 +1,5 @@
-import { API_BASE } from './config';
-import type { AnalyzeResponse, AtsResult, FeedbackResponse } from './types';
+import { API_BASE } from '../shared/config';
+import type { AnalyzeResponse, AtsResult, FeedbackResponse } from '../shared/types';
 
 /** Cliente HTTP do backend. Cada método mapeia erros para códigos conhecidos. */
 

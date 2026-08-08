@@ -1,8 +1,8 @@
 import { analyzeJob, sendFeedback } from './api';
 import { getOrConnectToken, connect, disconnect } from './connect';
 import { setScoreBadge, clearBadge } from './badge';
-import { getToken, addHistory, getCachedAnalysis, setCachedAnalysis } from './storage';
-import type { AnalyzeResponse, ExtensionMessage, FeedbackResponse } from './types';
+import { getToken, addHistory, getCachedAnalysis, setCachedAnalysis } from '../shared/storage';
+import type { AnalyzeResponse, ExtensionMessage, FeedbackResponse } from '../shared/types';
 
 // Clique no ícone abre o side panel automaticamente.
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});

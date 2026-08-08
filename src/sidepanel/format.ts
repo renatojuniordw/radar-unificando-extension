@@ -1,4 +1,4 @@
-import type { AtsResult } from './types';
+import type { AtsResult } from '../shared/types';
 
 /** Formata o resultado da análise como texto puro (para copiar/exportar). */
 export function formatResultToText(result: AtsResult): string {

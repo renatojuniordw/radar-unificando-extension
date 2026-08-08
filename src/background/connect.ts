@@ -1,5 +1,5 @@
-import { SITE_URL, CONNECT_PATH } from './config';
-import { getToken, setToken, clearToken } from './storage';
+import { SITE_URL, CONNECT_PATH } from '../shared/config';
+import { getToken, setToken, clearToken } from '../shared/storage';
 
 /** Retorna o token atual, conectando via launchWebAuthFlow se necessário. */
 export async function getOrConnectToken(): Promise<string | null> {

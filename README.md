@@ -60,28 +60,34 @@ npm run icons      # regenera os ícones placeholder
 
 ## Configuração
 
-A URL do site fica em `src/config.ts` (`SITE_URL`). Em produção, aponte para o
-domínio real do Radar Unificando.
+A URL do site fica em `src/shared/config.ts` (`SITE_URL`). Em produção, aponte
+para o domínio real do Radar Unificando.
 
 ## Estrutura
 
 ```
 src/
-  background.ts      → Service worker: abre o side panel, roteia mensagens,
+  background/        → Service worker: abre o side panel, roteia mensagens,
                        chama a API e injeta o content script sob demanda.
-  content.ts         → Content script: extrai o texto da página e notifica
+    index.ts         →   entry (roteador de mensagens).
+    api.ts           →   cliente HTTP do backend (analyze, feedback).
+    connect.ts       →   fluxo de conexão (launchWebAuthFlow + token).
+    badge.ts         →   badge de score no ícone.
+  content/           → Content script: extrai o texto da página e notifica
                        mudanças (PAGE_CHANGED).
-  sidepanel.tsx      → UI do Side Panel (análise, conexão, histórico).
-  extract.ts         → Fachada de extração (escolhe o extrator pela URL).
-  extractors/        → Extratores por site (LinkedIn, Gupy, InHire, genérico).
-  api.ts             → Cliente HTTP do backend (analyze, feedback).
-  connect.ts         → Fluxo de conexão (launchWebAuthFlow + token).
-  badge.ts           → Badge de score no ícone.
-  spa.ts             → Detecção de mudança de URL em SPAs.
-  storage/           → Persistência local (token, histórico, cache).
-  format.ts          → Formata o resultado para texto (copiar dicas).
-  clipboard.ts       → Helper de cópia com fallback.
-  types.ts           → Tipos e protocolo de mensagens.
+    index.ts         →   entry (listeners + observer).
+    extract.ts       →   fachada de extração (escolhe o extrator pela URL).
+    extractors/      →   extratores por site (LinkedIn, Gupy, InHire, genérico).
+    spa.ts           →   detecção de mudança de URL em SPAs.
+  sidepanel/         → UI do Side Panel (análise, conexão, histórico).
+    index.tsx        →   entry React.
+    components/      →   ErrorView, ResultView, Section.
+    format.ts        →   formata o resultado para texto (copiar dicas).
+    clipboard.ts     →   helper de cópia com fallback.
+  shared/            → Compartilhado entre os contextos.
+    config.ts        →   URL do site e da API.
+    types/           →   tipos de domínio, mensagens e contrato da API.
+    storage/         →   persistência local (token, histórico, cache).
 ```
 
 Veja [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) para o protocolo de

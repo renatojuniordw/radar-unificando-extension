@@ -1,7 +1,7 @@
 import { useState } from "react";
-import type { AtsResult } from "../../types";
-import { formatResultToText } from "../../format";
-import { copyText } from "../../clipboard";
+import type { AtsResult } from "../../shared/types";
+import { formatResultToText } from "../format";
+import { copyText } from "../clipboard";
 import Section from "./Section";
 
 function getQualityBadge(score: number) {

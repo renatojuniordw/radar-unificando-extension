@@ -1,7 +1,6 @@
 export const styles = `
   :root {
     color-scheme: light;
-    --accent: #00ff66;
     --accent: #10b981;
     --accent-soft: #ecfdf5;
     --accent-dark: #059669;

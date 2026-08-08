@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { AnalyzeResponse, AtsResult } from '../types';
-import { getHistory, clearHistory, type AnalysisHistoryEntry } from '../storage';
+import type { AnalyzeResponse, AtsResult } from '../shared/types';
+import { getHistory, clearHistory, type AnalysisHistoryEntry } from '../shared/storage';
 import { errorMessage } from './utils';
 
 export type PanelState =
