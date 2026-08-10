@@ -71,7 +71,9 @@ async function handleAnalyze(jobDescription: string): Promise<AnalyzeResponse> {
   const token = await getToken();
   if (!token) return { error: 'NOT_CONNECTED' };
 
-  const result = await analyzeJob(token, jobDescription);
+  const tab = await getActiveTab();
+  // O título da aba ajuda o backend a casar cursos com a skill do cargo.
+  const result = await analyzeJob(token, jobDescription, tab?.title);
   if ('error' in result) {
     if (result.error === 'NOT_CONNECTED') await clearToken();
     return result;
@@ -80,7 +82,6 @@ async function handleAnalyze(jobDescription: string): Promise<AnalyzeResponse> {
   await setScoreBadge(result.analysis.score);
   await setCachedAnalysis(cacheKey, result);
 
-  const tab = await getActiveTab();
   if (tab) {
     await addHistory({
       url: tab.url,

@@ -14,6 +14,7 @@ const ATS_RESULT: AtsResult = {
     skillScores: [],
   },
   cached: false,
+  courses: [],
 };
 
 function mockFetch(status: number, body: unknown) {

@@ -114,6 +114,21 @@
   .skill-name { color: var(--text); }
   .skill-suggestion { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
   .bad { color: var(--bad); }
+
+  .course-list { display: flex; flex-direction: column; gap: 8px; }
+  .course-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .course-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .course-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 6px; }
+  .course-badge.alura { color: var(--accent-dark); background: var(--accent-soft); border: 1px solid rgba(16, 185, 129, 0.3); }
+  .course-badge.udemy { color: #0284c7; background: #e0f2fe; border: 1px solid #bae6fd; }
+  .course-price { font-size: 11px; font-weight: 600; color: var(--muted); }
+  .course-title { margin: 0 0 2px; font-size: 12px; font-weight: 600; color: var(--text); }
+  .course-skill { margin: 0 0 6px; font-size: 11px; color: var(--muted); }
+  .course-link { display: inline-block; font-size: 11px; font-weight: 700; color: var(--accent-dark); text-decoration: none; }
+  .course-link:hover { text-decoration: underline; }
+  .course-all { display: inline-block; margin-top: 10px; font-size: 11px; font-weight: 700; color: var(--accent-dark); text-decoration: none; }
+  .course-all:hover { text-decoration: underline; }
+  .course-disclosure { margin: 8px 0 0; font-size: 10px; color: var(--dimmed); }
   .actions { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; gap: 8px; }
   .feedback { display: flex; align-items: center; gap: 6px; }
   .feedback button {

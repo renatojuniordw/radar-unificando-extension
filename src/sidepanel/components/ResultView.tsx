@@ -1,8 +1,28 @@
 import { useState } from "react";
 import type { AtsResult } from "../../shared/types";
+import { SITE_URL, API_BASE } from "../../shared/config";
 import { formatResultToText } from "../format";
 import { copyText } from "../clipboard";
 import Section from "./Section";
+
+/** Registra clique em curso de afiliado (fire-and-forget, sem bloquear navegação). */
+function trackCourseClick(c: { skill: string; plataforma: string; url: string }) {
+  try {
+    fetch(`${API_BASE}/track/course-click`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        courseId: c.url,
+        skill: c.skill,
+        platform: c.plataforma.toLowerCase(),
+        origin: "extension",
+        url: c.url,
+      }),
+    }).catch(() => undefined);
+  } catch {
+    // analytics nunca bloqueia a navegação
+  }
+}
 
 function getQualityBadge(score: number) {
   if (score >= 80) return { label: "Excelente", cls: "excellent" };
@@ -97,6 +117,45 @@ function ResultView({ result }: { result: AtsResult }) {
               </span>
             ))}
           </div>
+        </Section>
+      )}
+
+      {result.courses?.length > 0 && (
+        <Section title="Cursos Recomendados">
+          <div className="course-list">
+            {result.courses.map((c) => (
+              <div key={c.url} className="course-card">
+                <div className="course-top">
+                  <span className={`course-badge ${c.plataforma.toLowerCase()}`}>
+                    {c.plataforma}
+                  </span>
+                  <span className="course-price">{c.preco}</span>
+                </div>
+                <p className="course-title">{c.titulo}</p>
+                <p className="course-skill">{c.skill}</p>
+                <a
+                  className="course-link"
+                  href={c.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackCourseClick(c)}
+                >
+                  Ver curso
+                </a>
+              </div>
+            ))}
+          </div>
+          <a
+            className="course-all"
+            href={`${SITE_URL}/cursos`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Ver todos os cursos →
+          </a>
+          <p className="course-disclosure">
+            Links de afiliado — você apoia o Radar sem pagar a mais.
+          </p>
         </Section>
       )}
 

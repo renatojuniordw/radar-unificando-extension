@@ -6,11 +6,12 @@ import type { AnalyzeResponse, AtsResult, FeedbackResponse } from '../shared/typ
 export async function analyzeJob(
   token: string,
   jobDescription: string,
+  jobTitle?: string,
 ): Promise<AnalyzeResponse> {
   const res = await fetch(`${API_BASE}/extension/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ jobDescription }),
+    body: JSON.stringify({ jobDescription, jobTitle }),
   });
 
   if (res.status === 401) return { error: 'NOT_CONNECTED' };

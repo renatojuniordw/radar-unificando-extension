@@ -29,8 +29,17 @@ export interface AtsAnalysis {
   skillScores: SkillScore[];
 }
 
+export interface CourseRecommendation {
+  titulo: string;
+  plataforma: 'Alura' | 'Udemy';
+  skill: string;
+  preco: string;
+  url: string;
+}
+
 export interface AtsResult {
   heuristics: AtsHeuristic;
   analysis: AtsAnalysis;
   cached: boolean;
+  courses: CourseRecommendation[];
 }

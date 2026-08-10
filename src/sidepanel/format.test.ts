@@ -14,6 +14,7 @@ const result: AtsResult = {
     skillScores: [{ skill: 'React', score: 80, present: true, suggestion: 'Adicione' }],
   },
   cached: false,
+  courses: [],
 };
 
 describe('formatResultToText', () => {
