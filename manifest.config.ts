@@ -8,7 +8,7 @@ export default defineManifest({
   author: { email: "contato@unificando.com.br" },
   homepage_url: "https://radar.unificando.com.br/extensao",
   description:
-    "Analise vagas no Gupy, LinkedIn e InHire em tempo real. Veja seu score ATS, palavras-chave de IA faltando no currículo e receba dicas personalizadas para passar em triagens automatizadas.",
+    "Analise vagas no Gupy, LinkedIn e InHire em tempo real. Veja seu score ATS e dicas personalizadas para otimizar seu currículo.",
   action: {
     default_title: "Analisar vaga no Radar Unificando",
     default_icon: "public/icons/icon48.png",
