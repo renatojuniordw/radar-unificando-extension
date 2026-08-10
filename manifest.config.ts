@@ -4,9 +4,9 @@ export default defineManifest({
   manifest_version: 3,
   name: "Radar Unificando — Análise de Vagas e Score ATS",
   short_name: "Radar Unificando",
-  version: "0.1.0",
-  author: { email: "contato@radarunificando.com.br" },
-  homepage_url: "https://radarunificando.com.br/extensao",
+  version: "1.0.0",
+  author: { email: "contato@unificando.com.br" },
+  homepage_url: "https://radar.unificando.com.br/extensao",
   description:
     "Analise vagas no Gupy, LinkedIn e InHire em tempo real. Veja seu score ATS, palavras-chave de IA faltando no currículo e receba dicas personalizadas para passar em triagens automatizadas.",
   action: {
@@ -22,6 +22,7 @@ export default defineManifest({
     "https://*.gupy.io/*",
     "https://*.inhire.app/*",
     "https://*.inhire.com/*",
+    "https://radar.unificando.com.br/*",
     "http://localhost:11010/*",
   ],
   background: {
