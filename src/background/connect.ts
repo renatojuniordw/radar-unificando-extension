@@ -34,7 +34,12 @@ async function doConnect(): Promise<string | null> {
     if (token) await setToken(token);
     return token;
   } catch (err) {
-    console.error('[extension] Falha na conexão:', err);
+    const error = err instanceof Error ? err : new Error(String(err));
+    console.error('[extension] Falha na conexão:', {
+      message: error.message,
+      stack: error.stack,
+      url: url.slice(0, 100),
+    });
     return null;
   }
 }

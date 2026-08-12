@@ -24,7 +24,6 @@ export interface AtsAnalysis {
   summary: string;
   strengths: string[];
   missingKeywords: string[];
-  formattingIssues: string[];
   recommendations: string[];
   skillScores: SkillScore[];
 }

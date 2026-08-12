@@ -9,7 +9,6 @@ const result: AtsResult = {
     summary: 'Bom currículo',
     strengths: ['Experiência relevante'],
     missingKeywords: ['React'],
-    formattingIssues: [],
     recommendations: ['Adicione React'],
     skillScores: [{ skill: 'React', score: 80, present: true, suggestion: 'Adicione' }],
   },

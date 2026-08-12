@@ -49,6 +49,3 @@ export async function setCachedAnalysis(key: string, result: AtsResult): Promise
   await writeCache(cache);
 }
 
-export async function clearCache(): Promise<void> {
-  await chrome.storage.local.remove(CACHE_KEY);
-}

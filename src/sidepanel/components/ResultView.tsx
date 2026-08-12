@@ -20,7 +20,7 @@ function trackCourseClick(c: { skill: string; plataforma: string; url: string })
       }),
     }).catch(() => undefined);
   } catch {
-    // analytics nunca bloqueia a navegação
+    // fire-and-forget: erro de analytics não deve bloquear a navegação
   }
 }
 

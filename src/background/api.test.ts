@@ -9,7 +9,6 @@ const ATS_RESULT: AtsResult = {
     summary: 'Resumo',
     strengths: [],
     missingKeywords: [],
-    formattingIssues: [],
     recommendations: [],
     skillScores: [],
   },
@@ -48,7 +47,7 @@ describe('analyzeJob', () => {
 
   it('propaga o erro do backend em outros status', async () => {
     mockFetch(500, { error: 'boom' });
-    await expect(analyzeJob('token', 'vaga')).resolves.toEqual({ error: 'boom' });
+    await expect(analyzeJob('token', 'vaga')).resolves.toEqual({ error: 'UNKNOWN', message: 'boom' });
   });
 
   it('retorna o AtsResult em 200', async () => {

@@ -1,11 +1,9 @@
-const GREEN = '#16a34a';
-const YELLOW = '#ca8a04';
-const RED = '#dc2626';
+import { BADGE_COLORS } from '../shared/config';
 
 function colorForScore(score: number): string {
-  if (score >= 70) return GREEN;
-  if (score >= 40) return YELLOW;
-  return RED;
+  if (score >= 70) return BADGE_COLORS.GOOD;
+  if (score >= 40) return BADGE_COLORS.WARNING;
+  return BADGE_COLORS.BAD;
 }
 
 /** Mostra o score da última análise no ícone da extensão. */

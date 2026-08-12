@@ -10,13 +10,13 @@ export async function copyText(text: string): Promise<boolean> {
     textarea.style.opacity = '0';
     document.body.appendChild(textarea);
     textarea.select();
-    let ok = false;
+    let copySuccess = false;
     try {
-      ok = document.execCommand('copy');
+      copySuccess = document.execCommand('copy');
     } catch {
-      ok = false;
+      copySuccess = false;
     }
     textarea.remove();
-    return ok;
+    return copySuccess;
   }
 }

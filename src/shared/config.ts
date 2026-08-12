@@ -6,3 +6,10 @@ export const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://radar.unifican
 
 export const API_BASE = `${SITE_URL}/api`;
 export const CONNECT_PATH = '/extensao/conectar';
+
+/** Cores do badge de score */
+export const BADGE_COLORS = {
+  GOOD: '#16a34a',
+  WARNING: '#ca8a04',
+  BAD: '#dc2626',
+} as const;
