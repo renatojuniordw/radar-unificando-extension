@@ -60,24 +60,29 @@ async function getPageTextFromActiveTab(): Promise<{ text: string; url: string }
 }
 
 async function handleAnalyze(jobDescription: string): Promise<AnalyzeResponse> {
+  console.log('[radar-ext] handleAnalyze: início', { jobDescriptionLength: jobDescription.length });
   const cacheKey = hashText(jobDescription);
 
   const cached = await getCachedAnalysis(cacheKey);
   if (cached) {
+    console.log('[radar-ext] handleAnalyze: cache local hit', { score: cached.analysis.score });
     await setScoreBadge(cached.analysis.score);
     return cached;
   }
 
   const token = await getToken();
+  console.log('[radar-ext] handleAnalyze: token', { hasToken: Boolean(token) });
   if (!token) return { error: 'NOT_CONNECTED' };
 
   const tab = await getActiveTab();
   // O título da aba ajuda o backend a casar cursos com a skill do cargo.
   const result = await analyzeJob(token, jobDescription, tab?.title);
   if ('error' in result) {
+    console.error('[radar-ext] handleAnalyze: erro retornado por analyzeJob', result);
     if (result.error === 'NOT_CONNECTED') await clearToken();
     return result;
   }
+  console.log('[radar-ext] handleAnalyze: análise concluída', { score: result.analysis.score });
 
   await setScoreBadge(result.analysis.score);
   await setCachedAnalysis(cacheKey, result);
@@ -106,7 +111,10 @@ chrome.runtime.onMessage.addListener((msg: ExtensionMessage, _sender, sendRespon
     case 'ANALYZE':
       handleAnalyze(String(msg.jobDescription ?? ''))
         .then(sendResponse)
-        .catch((err) => sendResponse({ error: String(err) }));
+        .catch((err) => {
+          console.error('[radar-ext] handleAnalyze: exceção não tratada', err);
+          sendResponse({ error: 'UNKNOWN', message: String(err) });
+        });
       return true;
 
     case 'FEEDBACK':

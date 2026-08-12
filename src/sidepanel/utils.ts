@@ -4,7 +4,7 @@ export function truncateUrl(url: string, max = 60): string {
   return url.length > max ? `${url.slice(0, max)}…` : url;
 }
 
-export function errorMessage(code: AnalyzeErrorCode): string {
+export function errorMessage(code: AnalyzeErrorCode, detail?: string): string {
   switch (code) {
     case 'NOT_CONNECTED':
       return 'Sua conta não está conectada. Clique em "Conectar" no rodapé para continuar.';
@@ -15,6 +15,8 @@ export function errorMessage(code: AnalyzeErrorCode): string {
     case 'NO_TEXT':
       return 'Não encontramos texto de vaga nesta página.';
     default:
-      return 'Não foi possível analisar a vaga. Tente novamente.';
+      return detail
+        ? `Não foi possível analisar a vaga: ${detail}`
+        : 'Não foi possível analisar a vaga. Tente novamente.';
   }
 }

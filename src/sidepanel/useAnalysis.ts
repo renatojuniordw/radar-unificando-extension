@@ -19,17 +19,25 @@ export function useAnalysis() {
   const connectedRef = useRef<boolean | null>(null);
 
   function runAnalysis(text: string, requestId: number) {
+    console.log('[radar-ext] sidepanel: iniciando análise', { textLength: text.length, requestId });
     setState({ status: 'loading' });
     chrome.runtime.sendMessage({ type: 'ANALYZE', jobDescription: text }, (res: AnalyzeResponse) => {
-      if (requestId !== requestIdRef.current) return; // resposta obsoleta
+      if (requestId !== requestIdRef.current) {
+        console.log('[radar-ext] sidepanel: resposta obsoleta descartada', { requestId });
+        return;
+      }
       if (!res) {
+        console.error('[radar-ext] sidepanel: sem resposta do background', chrome.runtime.lastError);
         setState({ status: 'error', code: 'UNKNOWN', message: 'Sem resposta da extensão.' });
         return;
       }
       if ('error' in res) {
-        setState({ status: 'error', code: res.error as AnalyzeErrorCode, message: errorMessage(res.error as AnalyzeErrorCode) });
+        console.error('[radar-ext] sidepanel: erro na análise', res);
+        const code = res.error as AnalyzeErrorCode;
+        setState({ status: 'error', code, message: errorMessage(code, res.message) });
         return;
       }
+      console.log('[radar-ext] sidepanel: análise concluída', { score: res.analysis?.score });
       setState({ status: 'done', result: res });
     });
   }
@@ -39,6 +47,7 @@ export function useAnalysis() {
     const res = await chrome.runtime.sendMessage({ type: 'GET_PAGE_TEXT' });
     if (requestId !== requestIdRef.current) return; // navegou de novo
     const text = res?.text;
+    console.log('[radar-ext] sidepanel: GET_PAGE_TEXT', { url: res?.url, textLength: text?.length ?? 0, force });
     if (!text) {
       setState({ status: 'error', code: 'NO_TEXT', message: 'Não encontramos texto de vaga nesta página.' });
       return;

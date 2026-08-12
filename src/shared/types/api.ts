@@ -3,7 +3,7 @@ import type { AtsResult } from './domain';
 /** Contrato dos endpoints /api/extension/*. */
 
 /** Resposta do endpoint /api/extension/analyze. */
-export type AnalyzeResponse = AtsResult | { error: string };
+export type AnalyzeResponse = AtsResult | { error: string; message?: string };
 
 export type AnalyzeErrorCode =
   | 'NOT_CONNECTED'

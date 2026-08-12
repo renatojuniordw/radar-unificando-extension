@@ -20,6 +20,10 @@ if (window.__radarContentLoaded) {
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.type === 'GET_PAGE_TEXT') {
       const text = extractJobText(document, location.href);
+      console.log('[radar-ext] content: texto extraído', {
+        url: location.href,
+        textLength: text?.length ?? 0,
+      });
       sendResponse({ text, url: location.href });
     }
   });
