@@ -26,13 +26,13 @@ describe('copyText', () => {
     vi.restoreAllMocks();
   });
 
-  it('uses Clipboard API when available and returns true', async () => {
+  it('should_use_Clipboard_API_when_available_and_return_true', async () => {
     const result = await copyText('test text');
     expect(result).toBe(true);
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('test text');
   });
 
-  it('returns false when Clipboard API fails and execCommand fails', async () => {
+  it('should_return_false_when_Clipboard_API_fails_and_execCommand_fails', async () => {
     (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not allowed'));
     (document.execCommand as ReturnType<typeof vi.fn>).mockReturnValue(false);
 
@@ -40,7 +40,7 @@ describe('copyText', () => {
     expect(result).toBe(false);
   });
 
-  it('uses fallback when Clipboard API throws', async () => {
+  it('should_use_fallback_when_Clipboard_API_throws', async () => {
     (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not allowed'));
 
     const result = await copyText('fallback text');
@@ -48,11 +48,82 @@ describe('copyText', () => {
     expect(document.execCommand).toHaveBeenCalledWith('copy');
   });
 
-  it('creates textarea element for fallback', async () => {
+  it('should_create_textarea_element_for_fallback', async () => {
     (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not allowed'));
 
     await copyText('test');
     expect(document.createElement).toHaveBeenCalledWith('textarea');
     expect(document.body.appendChild).toHaveBeenCalled();
+  });
+
+  it('should_set_textarea_value_and_select_it', async () => {
+    (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not allowed'));
+    const mockTextarea = {
+      value: '',
+      style: {},
+      select: vi.fn(),
+      remove: vi.fn(),
+    };
+    (document.createElement as ReturnType<typeof vi.fn>).mockReturnValue(mockTextarea);
+
+    await copyText('my text');
+    expect(mockTextarea.value).toBe('my text');
+    expect(mockTextarea.select).toHaveBeenCalled();
+  });
+
+  it('should_remove_textarea_after_copy', async () => {
+    (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not allowed'));
+    const mockTextarea = {
+      value: '',
+      style: {},
+      select: vi.fn(),
+      remove: vi.fn(),
+    };
+    (document.createElement as ReturnType<typeof vi.fn>).mockReturnValue(mockTextarea);
+
+    await copyText('test');
+    expect(mockTextarea.remove).toHaveBeenCalled();
+  });
+
+  it('should_return_false_when_execCommand_throws_an_exception', async () => {
+    (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not allowed'));
+    (document.execCommand as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      throw new Error('execCommand not supported');
+    });
+
+    const result = await copyText('test');
+    expect(result).toBe(false);
+  });
+
+  it('should_still_remove_textarea_when_execCommand_throws', async () => {
+    (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not allowed'));
+    const mockTextarea = {
+      value: '',
+      style: {},
+      select: vi.fn(),
+      remove: vi.fn(),
+    };
+    (document.createElement as ReturnType<typeof vi.fn>).mockReturnValue(mockTextarea);
+    (document.execCommand as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      throw new Error('execCommand not supported');
+    });
+
+    await copyText('test');
+    expect(mockTextarea.remove).toHaveBeenCalled();
+  });
+
+  it('should_set_textarea_style_to_fixed_and_opacity_zero', async () => {
+    (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not allowed'));
+    const mockTextarea = {
+      value: '',
+      style: {},
+      select: vi.fn(),
+      remove: vi.fn(),
+    };
+    (document.createElement as ReturnType<typeof vi.fn>).mockReturnValue(mockTextarea);
+
+    await copyText('test');
+    expect(mockTextarea.style.position).toBe('fixed');
+    expect(mockTextarea.style.opacity).toBe('0');
   });
 });

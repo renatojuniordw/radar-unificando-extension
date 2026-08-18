@@ -24,13 +24,13 @@ describe('history storage', () => {
     Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
   });
 
-  it('getHistory retorna array vazio quando não há histórico', async () => {
+  it('should_return_empty_array_when_no_history_is_stored', async () => {
     const { getHistory } = await import('./history');
     const result = await getHistory();
     expect(result).toEqual([]);
   });
 
-  it('getHistory retorna o histórico salvo', async () => {
+  it('should_return_the_stored_history_entries', async () => {
     const { getHistory } = await import('./history');
     const entries = [
       { url: 'https://example.com/job/1', title: 'Dev React', score: 85, date: '2024-01-01T00:00:00Z' },
@@ -42,7 +42,7 @@ describe('history storage', () => {
     expect(result).toEqual(entries);
   });
 
-  it('addHistory adiciona entrada ao início do histórico', async () => {
+  it('should_prepend_a_new_entry_to_the_history', async () => {
     const { addHistory, getHistory } = await import('./history');
     const existing = [
       { url: 'https://example.com/job/1', title: 'Dev React', score: 85, date: '2024-01-01T00:00:00Z' },
@@ -57,7 +57,7 @@ describe('history storage', () => {
     expect(result).toHaveLength(2);
   });
 
-  it('addHistory remove duplicatas por URL', async () => {
+  it('should_move_an_existing_entry_with_the_same_url_to_the_top', async () => {
     const { addHistory, getHistory } = await import('./history');
     mockStorage['analysisHistory'] = [
       { url: 'https://example.com/job/1', title: 'Dev React', score: 85, date: '2024-01-01T00:00:00Z' },
@@ -70,9 +70,28 @@ describe('history storage', () => {
     const result = await getHistory();
     expect(result).toHaveLength(2);
     expect(result[0].title).toBe('Dev React Atualizado');
+    expect(result[1].url).toBe('https://example.com/job/2');
   });
 
-  it('addHistory limita o histórico a 50 itens', async () => {
+  it('should_keep_the_remaining_entries_in_their_original_order_after_dedup', async () => {
+    const { addHistory, getHistory } = await import('./history');
+    mockStorage['analysisHistory'] = [
+      { url: 'https://example.com/job/1', title: 'A', score: 10, date: '2024-01-01T00:00:00Z' },
+      { url: 'https://example.com/job/2', title: 'B', score: 20, date: '2024-01-02T00:00:00Z' },
+      { url: 'https://example.com/job/3', title: 'C', score: 30, date: '2024-01-03T00:00:00Z' },
+    ];
+
+    await addHistory({ url: 'https://example.com/job/2', title: 'B2', score: 99, date: '2024-01-04T00:00:00Z' });
+
+    const result = await getHistory();
+    expect(result.map((h) => h.url)).toEqual([
+      'https://example.com/job/2',
+      'https://example.com/job/1',
+      'https://example.com/job/3',
+    ]);
+  });
+
+  it('should_cap_the_history_at_50_items_dropping_the_oldest', async () => {
     const { addHistory, getHistory } = await import('./history');
     const entries = Array.from({ length: 50 }, (_, i) => ({
       url: `https://example.com/job/${i}`,
@@ -88,9 +107,10 @@ describe('history storage', () => {
     const result = await getHistory();
     expect(result).toHaveLength(50);
     expect(result[0].url).toBe('https://example.com/job/new');
+    expect(result[49].url).toBe('https://example.com/job/48');
   });
 
-  it('clearHistory remove todo o histórico', async () => {
+  it('should_clear_the_entire_history', async () => {
     const { clearHistory, getHistory } = await import('./history');
     mockStorage['analysisHistory'] = [
       { url: 'https://example.com/job/1', title: 'Dev React', score: 85, date: '2024-01-01T00:00:00Z' },
