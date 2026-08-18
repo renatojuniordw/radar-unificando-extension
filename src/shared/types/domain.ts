@@ -30,7 +30,7 @@ export interface AtsAnalysis {
 
 export interface CourseRecommendation {
   titulo: string;
-  plataforma: 'Alura' | 'Udemy';
+  plataforma: 'Udemy';
   skill: string;
   preco: string;
   url: string;

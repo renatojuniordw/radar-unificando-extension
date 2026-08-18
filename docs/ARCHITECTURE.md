@@ -94,7 +94,7 @@ re-tentando até 3 vezes.
 
 | Rota | Descrição |
 |------|-----------|
-| `POST /api/extension/analyze` | Analisa a vaga contra o currículo do usuário (auth por token Bearer, rate limit 20/min). Body: `{ jobDescription, jobTitle? }` (o título da aba é enviado para melhorar o match dos cursos). Retorna `{ heuristics, analysis, cached, courses }` — `courses` (máx. 3) são recomendações de afiliado Alura/Udemy exibidas no painel após "Skills Faltando". |
+| `POST /api/extension/analyze` | Analisa a vaga contra o currículo do usuário (auth por token Bearer, rate limit 20/min). Body: `{ jobDescription, jobTitle? }` (o título da aba é enviado para melhorar o match dos cursos). Retorna `{ heuristics, analysis, cached, courses }` — `courses` (máx. 3) são recomendações de afiliado Udemy exibidas no painel após "Skills Faltando". |
 | `POST /api/extension/feedback` | Registra avaliação de utilidade. |
 | `GET /extensao/conectar` | Página autenticada que emite o token de extensão. |
 

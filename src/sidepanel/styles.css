@@ -119,7 +119,6 @@
   .course-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
   .course-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
   .course-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 6px; }
-  .course-badge.alura { color: var(--accent-dark); background: var(--accent-soft); border: 1px solid rgba(16, 185, 129, 0.3); }
   .course-badge.udemy { color: #0284c7; background: #e0f2fe; border: 1px solid #bae6fd; }
   .course-price { font-size: 11px; font-weight: 600; color: var(--muted); }
   .course-title { margin: 0 0 2px; font-size: 12px; font-weight: 600; color: var(--text); }

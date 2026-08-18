@@ -4,7 +4,7 @@ export default defineManifest({
   manifest_version: 3,
   name: "Radar Unificando — Análise de Vagas e Score ATS",
   short_name: "Radar Unificando",
-  version: "1.0.0",
+  version: "1.0.1",
   author: { email: "contato@unificando.com.br" },
   homepage_url: "https://radar.unificando.com.br/extensao",
   description:
