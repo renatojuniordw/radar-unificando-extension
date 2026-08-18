@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { hashText } from './cache';
+import type { AtsResult } from '../../shared/types';
 
 const CACHE_TTL_MS = 30 * 60 * 1000;
 
@@ -62,10 +63,17 @@ describe('cache functions (mock chrome.storage)', () => {
     Object.keys(mockStorage).forEach((k) => delete mockStorage[k]);
   });
 
-  function makeResult(score: number) {
+  function makeResult(score: number): AtsResult {
     return {
       heuristics: { checks: [], score },
-      analysis: { score },
+      analysis: {
+        score,
+        summary: '',
+        strengths: [],
+        missingKeywords: [],
+        recommendations: [],
+        skillScores: [],
+      },
       cached: false,
       courses: [],
     };

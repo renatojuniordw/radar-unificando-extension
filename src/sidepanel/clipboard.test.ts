@@ -1,6 +1,22 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { copyText } from './clipboard';
 
+interface MockTextarea {
+  value: string;
+  style: { position?: string; opacity?: string };
+  select: ReturnType<typeof vi.fn>;
+  remove: ReturnType<typeof vi.fn>;
+}
+
+function createMockTextarea(): MockTextarea {
+  return {
+    value: '',
+    style: {},
+    select: vi.fn(),
+    remove: vi.fn(),
+  };
+}
+
 describe('copyText', () => {
   beforeEach(() => {
     vi.stubGlobal('navigator', {
@@ -9,12 +25,7 @@ describe('copyText', () => {
       },
     });
     vi.stubGlobal('document', {
-      createElement: vi.fn(() => ({
-        value: '',
-        style: {},
-        select: vi.fn(),
-        remove: vi.fn(),
-      })),
+      createElement: vi.fn(() => createMockTextarea()),
       body: {
         appendChild: vi.fn(),
       },
@@ -58,12 +69,7 @@ describe('copyText', () => {
 
   it('should_set_textarea_value_and_select_it', async () => {
     (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not allowed'));
-    const mockTextarea = {
-      value: '',
-      style: {},
-      select: vi.fn(),
-      remove: vi.fn(),
-    };
+    const mockTextarea = createMockTextarea();
     (document.createElement as ReturnType<typeof vi.fn>).mockReturnValue(mockTextarea);
 
     await copyText('my text');
@@ -73,12 +79,7 @@ describe('copyText', () => {
 
   it('should_remove_textarea_after_copy', async () => {
     (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not allowed'));
-    const mockTextarea = {
-      value: '',
-      style: {},
-      select: vi.fn(),
-      remove: vi.fn(),
-    };
+    const mockTextarea = createMockTextarea();
     (document.createElement as ReturnType<typeof vi.fn>).mockReturnValue(mockTextarea);
 
     await copyText('test');
@@ -97,12 +98,7 @@ describe('copyText', () => {
 
   it('should_still_remove_textarea_when_execCommand_throws', async () => {
     (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not allowed'));
-    const mockTextarea = {
-      value: '',
-      style: {},
-      select: vi.fn(),
-      remove: vi.fn(),
-    };
+    const mockTextarea = createMockTextarea();
     (document.createElement as ReturnType<typeof vi.fn>).mockReturnValue(mockTextarea);
     (document.execCommand as ReturnType<typeof vi.fn>).mockImplementation(() => {
       throw new Error('execCommand not supported');
@@ -114,12 +110,7 @@ describe('copyText', () => {
 
   it('should_set_textarea_style_to_fixed_and_opacity_zero', async () => {
     (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('not allowed'));
-    const mockTextarea = {
-      value: '',
-      style: {},
-      select: vi.fn(),
-      remove: vi.fn(),
-    };
+    const mockTextarea = createMockTextarea();
     (document.createElement as ReturnType<typeof vi.fn>).mockReturnValue(mockTextarea);
 
     await copyText('test');
