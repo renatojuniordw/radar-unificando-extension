@@ -62,9 +62,9 @@ npm run icons      # regenera os ícones placeholder
 
 ## Configuração
 
-A URL do site é lida de `VITE_SITE_URL` (padrão: `http://localhost:11010`, veja
-`.env.example`). Em produção, defina `VITE_SITE_URL` com o domínio real do Radar
-Unificando (ex.: em `.env.local`).
+A URL do site é lida de `VITE_SITE_URL` (padrão: `https://radar.unificando.com.br`,
+veja `.env.example`). Para desenvolvimento local, defina `VITE_SITE_URL` como
+`http://localhost:11010` no `.env`.
 
 ## Estrutura
 
@@ -86,6 +86,7 @@ src/
     index.tsx        →   entry React.
     SidePanel.tsx    →   layout principal do painel.
     useAnalysis.ts   →   hook de estado: análise, conexão e re-análise automática.
+    hooks/           →   hooks modulares: useConnection, useHistory, useJobAnalysis.
     components/      →   ErrorView, ResultView, Section.
     format.ts        →   formata o resultado para texto (copiar dicas).
     clipboard.ts     →   helper de cópia com fallback.

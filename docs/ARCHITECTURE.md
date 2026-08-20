@@ -45,6 +45,7 @@ Mensagens trocadas via `chrome.runtime.sendMessage` / `chrome.tabs.sendMessage`
 | `sidepanel/index.tsx` | Entry React que monta o `SidePanel`. |
 | `sidepanel/SidePanel.tsx` | Layout do painel: header (status de conexão, "Reanalisar"), URL atual, corpo (loading/erro/resultado) e footer (histórico colapsável, conectar/desconectar, limpar). |
 | `sidepanel/useAnalysis.ts` | Hook de estado: análise, conexão e **re-análise automática** em `tabs.onActivated`, `tabs.onUpdated` (URL), `PAGE_CHANGED` e `chrome.storage.onChanged` (mudança de token). Descarta respostas obsoletas via `requestIdRef`. |
+| `sidepanel/hooks/` | Hooks modulares: `useConnection` (estado de conexão/desconexão), `useHistory` (histórico de análises), `useJobAnalysis` (orquestração de análise de vaga). |
 | `sidepanel/utils.ts` | `truncateUrl` e `errorMessage` (mensagens pt-BR por código de erro). |
 | `content/extract.ts` + `content/extractors/` | Fachada `extractJobText(doc, url)` que delega ao extrator do site (`JobExtractor`), com fallback para o genérico. Novos sites são adicionados sem alterar os existentes (OCP). |
 | `background/api.ts` | Cliente HTTP do backend (`analyzeJob`, `sendFeedback`), mapeando erros para códigos conhecidos. |
