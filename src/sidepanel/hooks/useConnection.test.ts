@@ -97,6 +97,34 @@ describe('useConnection', () => {
     expect(onConnected).not.toHaveBeenCalled();
   });
 
+  it('should_set_connect_error_when_connect_fails', async () => {
+    sendMessageMock.mockImplementation((_msg: { type: string }, cb: (res: unknown) => void) => cb({ connected: false }));
+    const { result } = renderHook(() => useConnection());
+
+    act(() => {
+      result.current.connect();
+    });
+
+    await waitFor(() => {
+      expect(result.current.connectError).toContain('Não foi possível conectar');
+    });
+    expect(sendMessageMock).toHaveBeenCalledWith({ type: 'CONNECT' }, expect.any(Function));
+  });
+
+  it('should_clear_connect_error_on_connect_success', async () => {
+    sendMessageMock.mockImplementation((_msg: { type: string }, cb: (res: unknown) => void) => cb({ connected: true }));
+    const { result } = renderHook(() => useConnection());
+
+    act(() => {
+      result.current.connect();
+    });
+
+    await waitFor(() => {
+      expect(result.current.connected).toBe(true);
+    });
+    expect(result.current.connectError).toBeNull();
+  });
+
   it('should_optimistically_set_disconnected_before_sending_DISCONNECT', async () => {
     sendMessageMock.mockImplementation((_msg: { type: string }, cb: (res: unknown) => void) => cb({ connected: false }));
     const { result } = renderHook(() => useConnection());

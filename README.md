@@ -70,6 +70,11 @@ veja `.env.example`). Para desenvolvimento local, defina `VITE_SITE_URL` como
 > (`npm run dev`). O build de produção (`npm run build` / `npm run zip`) gera o
 > manifesto **sem** localhost, com `minimum_chrome_version: "114"`.
 
+## Solução de problemas
+
+Erros comuns (análise 401/400/429, falha de conexão, alertas do console) e como
+resolver: veja [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md).
+
 ## Estrutura
 
 ```

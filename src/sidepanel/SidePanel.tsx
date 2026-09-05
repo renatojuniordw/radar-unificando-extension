@@ -7,6 +7,7 @@ import './styles.css';
 function SidePanel() {
   const {
     connected,
+    connectError,
     state,
     currentUrl,
     history,
@@ -58,6 +59,12 @@ function SidePanel() {
         )}
         {state.status === 'done' && <ResultView result={state.result} />}
       </div>
+
+      {connectError && (
+        <p className="error" role="alert">
+          {connectError}
+        </p>
+      )}
 
       <footer className="footer">
         <div className="history-head">

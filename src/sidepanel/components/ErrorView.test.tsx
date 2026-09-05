@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import ErrorView from './ErrorView';
+import { SITE_URL } from '../../shared/config';
 
 afterEach(() => {
   cleanup();
@@ -29,5 +30,18 @@ describe('ErrorView', () => {
   it('should_not_show_connect_button_for_UNKNOWN_error', () => {
     render(<ErrorView code="UNKNOWN" message="Erro desconhecido." onRetry={() => {}} />);
     expect(screen.queryByRole('button', { name: 'Conectar conta' })).toBeNull();
+  });
+
+  it('should_show_import_resume_link_when_code_is_NO_RESUME', () => {
+    render(<ErrorView code="NO_RESUME" message="Nenhum currículo encontrado." onRetry={() => {}} />);
+    const link = screen.getByRole('link', { name: 'Importar currículo' }) as HTMLAnchorElement;
+    expect(link).toBeTruthy();
+    expect(link.href).toBe(`${SITE_URL}/`);
+    expect(link.target).toBe('_blank');
+  });
+
+  it('should_not_show_import_resume_link_for_other_error_codes', () => {
+    render(<ErrorView code="RATE_LIMITED" message="Aguarde." onRetry={() => {}} />);
+    expect(screen.queryByRole('link', { name: 'Importar currículo' })).toBeNull();
   });
 });

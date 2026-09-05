@@ -10,7 +10,7 @@ export function useAnalysis() {
     refreshHistory();
   }, [refreshHistory]);
 
-  const { connected, connectedRef, refreshStatus, connect, disconnect } = useConnection({ onConnected });
+  const { connected, connectedRef, connectError, refreshStatus, connect, disconnect } = useConnection({ onConnected });
   const { state, currentUrl, analyzeActiveTab } = useJobAnalysis({ connectedRef });
 
   // Função de connect que também dispara re-análise
@@ -32,6 +32,7 @@ export function useAnalysis() {
 
   return {
     connected,
+    connectError,
     state,
     currentUrl,
     history,

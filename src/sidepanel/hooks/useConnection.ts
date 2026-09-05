@@ -7,6 +7,7 @@ interface UseConnectionOptions {
 export function useConnection({ onConnected }: UseConnectionOptions = {}) {
   const [connected, setConnected] = useState<boolean | null>(null);
   const connectedRef = useRef<boolean | null>(null);
+  const [connectError, setConnectError] = useState<string | null>(null);
 
   function refreshStatus() {
     chrome.runtime.sendMessage({ type: 'GET_STATUS' }, (res) => {
@@ -17,15 +18,21 @@ export function useConnection({ onConnected }: UseConnectionOptions = {}) {
   }
 
   function connect() {
+    setConnectError(null);
     chrome.runtime.sendMessage({ type: 'CONNECT' }, (res) => {
       refreshStatus();
       if (res?.connected) {
         onConnected?.();
+      } else {
+        setConnectError(
+          'Não foi possível conectar. Verifique se você está logado no site Radar Unificando e tente novamente.',
+        );
       }
     });
   }
 
   function disconnect() {
+    setConnectError(null);
     connectedRef.current = false;
     setConnected(false);
     chrome.runtime.sendMessage({ type: 'DISCONNECT' }, () => refreshStatus());
@@ -55,6 +62,7 @@ export function useConnection({ onConnected }: UseConnectionOptions = {}) {
   return {
     connected,
     connectedRef,
+    connectError,
     refreshStatus,
     connect,
     disconnect,
