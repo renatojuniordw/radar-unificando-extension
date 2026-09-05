@@ -57,21 +57,93 @@ A extensão **coleta e transmite dados**, então marque o formulário de privaci
 - [ ] Fornecer **política de privacidade** na área apropriada do dashboard (rascunho em `docs/PRIVACY_POLICY.md`).
 - [ ] **Não** há coleta de dados pessoais identificáveis (nome, e-mail, localização) por esta extensão.
 
-## 5. Justificativa de permissões (seção "Single purpose" / review)
+## 5. Guia "Práticas de privacidade" — textos prontos para copiar e colar
 
-Preparar justificativa abaixo, para colar nos campos do dashboard se solicitado:
+A guia **"Práticas de privacidade"** do dashboard exige: descrição do **propósito único**, **justificativas de cada permissão** e justificativa de **código remoto**, além da confirmação de que o uso de dados obedece às políticas. Copie/cole os textos abaixo em cada campo. (Erros como "É necessário fornecer uma justificativa para X" somem ao preencher esses campos.)
 
-| Permissão | Justificativa |
-|---|---|
-| `storage` | Persistir token, histórico e cache de análises localmente. |
-| `identity` | Login via `chrome.identity.launchWebAuthFlow` (fluxo OAuth no site, sem senha na extensão). |
-| `activeTab` | Ler URL/título da aba ativa para enviar ao backend e injetar o content script sob demanda. |
-| `sidePanel` | Abrir o painel lateral (API Chrome 114+). |
-| `scripting` | Injetar o content script em abas abertas antes da instalação da extensão. |
-| `host_permissions` `*.linkedin.com`, `*.gupy.io`, `*.inhire.app`, `*.inhire.com` | Executar o content script que lê apenas a descrição visível da vaga nessas plataformas. |
-| `host_permissions` `radar.unificando.com.br` | Chamar a API (`/api/extension/*`) e o fluxo de conexão do próprio serviço. |
+### 5.1 Propósito único (singe purpose)
 
-**Single purpose:** a extensão tem um único propósito claro — analisar a vaga aberta e sugerir ajustes de currículo para ATS. Não há uso de dados para publicidade, venda ou propósito secundário.
+```
+A extensão Radar Unificando analisa, em tempo real, a descrição da vaga aberta
+pelo usuário em sites de emprego (LinkedIn, Gupy e InHire) e gera um "score ATS"
+com sugestões para otimizar o currículo. A extensão tem um propósito único:
+ajudar candidatos a avaliar a aderência do currículo a uma vaga antes de se
+candidatar. Não há publicidade, venda de dados nem qualquer outro uso
+secundário dos dados coletados.
+```
+
+### 5.2 Código remoto
+
+```
+A extensão não utiliza código remoto. Todo o código executado é empacotado e
+versionado no pacote enviado à loja (build estático gerado por build de
+produção). Não há uso de eval, new Function, carregamento de scripts externos
+ou CDN em tempo de execução.
+```
+
+### 5.3 activeTab
+
+```
+Usada para ler a URL e o título da aba ativa quando o usuário clica no ícone da
+extensão, e para injetar o content script sob demanda em abas abertas antes da
+instalação. O acesso é concedido somente pela ação do usuário (clique no
+ícone/painel) e por tempo limitado; nenhum conteúdo de aba é acessado sem ação
+do usuário.
+```
+
+### 5.4 identity
+
+```
+Usada exclusivamente para autenticar o usuário via chrome.identity.launchWebAuthFlow,
+abrindo o fluxo de login do site Radar Unificando para obter um token de acesso
+próprio da extensão. Nenhuma credencial ou dado de contas de terceiros é
+acessado.
+```
+
+### 5.5 Permissões de host
+
+```
+A extensão precisa de acesso a https://*.linkedin.com/*, https://*.gupy.io/*,
+https://*.inhire.app/* e https://*.inhire.com/* para executar o content script
+que lê APENAS a descrição da vaga visível ao usuário nessas páginas, e a
+https://radar.unificando.com.br/* para chamar a API do serviço (análise de
+vaga, feedback) e o fluxo de conexão. Não há <all_urls>: apenas esses domínios,
+e nada além da descrição da vaga é lido.
+```
+
+### 5.6 scripting
+
+```
+Usada para injetar o content script em abas que já estavam abertas antes de a
+extensão ser instalada ou atualizada, permitindo analisar vagas sem exigir que
+o usuário recarregue a página. A injeção ocorre somente quando o usuário aciona
+a extensão.
+```
+
+### 5.7 sidePanel
+
+```
+Usada para abrir o painel lateral da extensão, onde o usuário visualiza o
+resultado da análise, o histórico e a área de conexão. A extensão define o
+painel como comportamento padrão ao clicar no ícone da barra de navegação.
+```
+
+### 5.8 storage
+
+```
+Usada para armazenar localmente no dispositivo do usuário: o token de conexão da
+extensão, o histórico de análises (URL, título, score e data — limitado a 50
+itens) e um cache temporário de análises (válido por 30 minutos). Nenhum dado
+desse armazenamento é compartilhado com terceiros.
+```
+
+### 5.9 Confirmação de uso de dados / políticas
+
+Na mesma guia, declarar os dados coletados (conforme seção 4): texto da vaga,
+título da aba, avaliação "Útil?", clique em curso de afiliado (enviados ao
+servidor do desenvolvedor); token, histórico e cache (locais). Fornecer a URL
+da política de privacidade (rascunho em `docs/PRIVACY_POLICY.md`) e confirmar a
+adesão às Políticas do programa para desenvolvedores.
 
 ## 6. Pacote de publicação
 
