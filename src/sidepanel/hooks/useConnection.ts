@@ -31,8 +31,10 @@ export function useConnection({ onConnected }: UseConnectionOptions = {}) {
     chrome.runtime.sendMessage({ type: 'DISCONNECT' }, () => refreshStatus());
   }
 
-  // Listener para mudanças de token no storage
+  // Verifica o status na abertura do painel e reage a mudanças de token no storage.
   useEffect(() => {
+    refreshStatus();
+
     const onStorageChanged = (
       changes: { [key: string]: chrome.storage.StorageChange },
       areaName: string

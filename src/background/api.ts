@@ -3,6 +3,19 @@ import type { AnalyzeResponse, AtsResult, FeedbackResponse } from '../shared/typ
 
 /** Cliente HTTP do backend. Cada método mapeia erros para códigos conhecidos. */
 
+const REQUEST_TIMEOUT_MS = 15_000;
+
+/** Fetch com timeout: aborta a requisição após REQUEST_TIMEOUT_MS. */
+async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export async function analyzeJob(
   token: string,
   jobDescription: string,
@@ -18,7 +31,7 @@ export async function analyzeJob(
 
   let res: Response;
   try {
-    res = await fetch(url, {
+    res = await fetchWithTimeout(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ jobDescription, jobTitle }),
@@ -52,11 +65,17 @@ export async function sendFeedback(
   rating: boolean,
   comment?: string,
 ): Promise<FeedbackResponse> {
-  const res = await fetch(`${API_BASE}/extension/feedback`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ rating, comment }),
-  });
+  let res: Response;
+  try {
+    res = await fetchWithTimeout(`${API_BASE}/extension/feedback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ rating, comment }),
+    });
+  } catch (err) {
+    console.error('[radar-ext] sendFeedback: falha de rede/fetch', err);
+    return { error: 'UNKNOWN' };
+  }
 
   if (res.status === 401) return { error: 'NOT_CONNECTED' };
   if (!res.ok) return { error: 'UNKNOWN' };

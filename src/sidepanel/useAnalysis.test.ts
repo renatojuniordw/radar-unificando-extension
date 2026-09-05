@@ -94,7 +94,6 @@ describe('useAnalysis', () => {
 
   it('should_query_connection_status_on_mount', async () => {
     // REGRA CORRETA: ao montar, o status de conexão deve ser resolvido via GET_STATUS.
-    // DEFEITO: refreshStatus nunca é chamado no mount.
     const { result } = renderHook(() => useAnalysis());
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith({ type: 'GET_STATUS' }, expect.any(Function));

@@ -76,7 +76,12 @@ function SidePanel() {
                 Desconectar
               </button>
             ) : (
-              <button className="link" onClick={connect}>
+              <button
+                className="link"
+                onClick={connect}
+                disabled={connected === null}
+                title={connected === null ? 'Verificando…' : undefined}
+              >
                 Conectar
               </button>
             )}

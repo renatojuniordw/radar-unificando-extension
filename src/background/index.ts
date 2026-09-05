@@ -59,17 +59,12 @@ async function getPageTextFromActiveTab(): Promise<{ text: string; url: string }
   return null;
 }
 
-async function handleAnalyze(jobDescription: string): Promise<AnalyzeResponse> {
-  console.log('[radar-ext] handleAnalyze: início', { jobDescriptionLength: jobDescription.length });
-  const cacheKey = hashText(jobDescription);
+// Single-flight: deduplica análises concorrentes para o mesmo texto (mesma
+// chave de cache), evitando chamadas duplicadas à API e gravações repetidas de
+// cache/histórico quando o painel re-dispara ANALYZE.
+const inFlight = new Map<string, Promise<AnalyzeResponse>>();
 
-  const cached = await getCachedAnalysis(cacheKey);
-  if (cached) {
-    console.log('[radar-ext] handleAnalyze: cache local hit', { score: cached.analysis.score });
-    await setScoreBadge(cached.analysis.score);
-    return cached;
-  }
-
+async function doAnalyze(jobDescription: string, cacheKey: string): Promise<AnalyzeResponse> {
   const token = await getToken();
   console.log('[radar-ext] handleAnalyze: token', { hasToken: Boolean(token) });
   if (!token) return { error: 'NOT_CONNECTED' };
@@ -96,6 +91,30 @@ async function handleAnalyze(jobDescription: string): Promise<AnalyzeResponse> {
     });
   }
   return result;
+}
+
+async function handleAnalyze(jobDescription: string): Promise<AnalyzeResponse> {
+  console.log('[radar-ext] handleAnalyze: início', { jobDescriptionLength: jobDescription.length });
+  const cacheKey = hashText(jobDescription);
+
+  const cached = await getCachedAnalysis(cacheKey);
+  if (cached) {
+    console.log('[radar-ext] handleAnalyze: cache local hit', { score: cached.analysis.score });
+    await setScoreBadge(cached.analysis.score);
+    return cached;
+  }
+
+  const pending = inFlight.get(cacheKey);
+  if (pending) return pending;
+
+  const request = doAnalyze(jobDescription, cacheKey);
+  inFlight.set(cacheKey, request);
+  request
+    .finally(() => {
+      if (inFlight.get(cacheKey) === request) inFlight.delete(cacheKey);
+    })
+    .catch(() => {}); // evita unhandled rejection da promise derivada do finally
+  return request;
 }
 
 async function handleFeedback(rating: boolean, comment?: string): Promise<FeedbackResponse> {

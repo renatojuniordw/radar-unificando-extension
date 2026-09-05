@@ -1,10 +1,10 @@
 import { defineManifest } from "@crxjs/vite-plugin";
 
-export default defineManifest({
+export default defineManifest((env) => ({
   manifest_version: 3,
   name: "Radar Unificando — Análise de Vagas e Score ATS",
   short_name: "Radar Unificando",
-  version: "1.0.1",
+  version: "1.0.2",
   author: { email: "contato@unificando.com.br" },
   homepage_url: "https://radar.unificando.com.br/extensao",
   description:
@@ -16,6 +16,7 @@ export default defineManifest({
   side_panel: {
     default_path: "src/sidepanel/index.html",
   },
+  minimum_chrome_version: "114",
   permissions: ["identity", "storage", "activeTab", "sidePanel", "scripting"],
   host_permissions: [
     "https://*.linkedin.com/*",
@@ -23,7 +24,8 @@ export default defineManifest({
     "https://*.inhire.app/*",
     "https://*.inhire.com/*",
     "https://radar.unificando.com.br/*",
-    "http://localhost:11010/*",
+    // Apenas desenvolvimento: servidor local da API não entra no build de produção.
+    ...(env.command === "serve" ? ["http://localhost:11010/*"] : []),
   ],
   background: {
     service_worker: "src/background/index.ts",
@@ -41,14 +43,10 @@ export default defineManifest({
       run_at: "document_idle",
     },
   ],
-  oauth2: {
-    client_id: "radar-unificando-extension",
-    scopes: [],
-  },
   icons: {
     16: "public/icons/icon16.png",
     48: "public/icons/icon48.png",
     128: "public/icons/icon128.png",
     512: "public/icons/icon512.png",
   },
-});
+}));

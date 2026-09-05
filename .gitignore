@@ -5,4 +5,5 @@ dist/
 
 .agents/
 
+.env
 .env*.local

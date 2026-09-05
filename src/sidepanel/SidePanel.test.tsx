@@ -194,7 +194,6 @@ describe('SidePanel', () => {
   it('should_query_connection_status_on_mount', async () => {
     // REGRA CORRETA: ao abrir o painel, o status de conexão deve ser resolvido
     // via GET_STATUS para que o indicador reflita o estado real.
-    // DEFEITO: refreshStatus nunca é chamado no mount → o dot fica "Verificando…" para sempre.
     render(<SidePanel />);
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith({ type: 'GET_STATUS' }, expect.any(Function));

@@ -66,6 +66,10 @@ A URL do site é lida de `VITE_SITE_URL` (padrão: `https://radar.unificando.com
 veja `.env.example`). Para desenvolvimento local, defina `VITE_SITE_URL` como
 `http://localhost:11010` no `.env`.
 
+> `http://localhost:11010/*` fica em `host_permissions` **apenas no modo dev**
+> (`npm run dev`). O build de produção (`npm run build` / `npm run zip`) gera o
+> manifesto **sem** localhost, com `minimum_chrome_version: "114"`.
+
 ## Estrutura
 
 ```
