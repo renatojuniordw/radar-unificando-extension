@@ -8,6 +8,10 @@ aba ativa e re-analisa automaticamente quando você troca de vaga.
 Reaproveita a análise ATS do backend do Radar Unificando
 (`POST /api/extension/analyze`).
 
+🌐 [radar.unificando.com.br](https://radar.unificando.com.br) ·
+📖 [Guia da extensão](https://radar.unificando.com.br/extensao) ·
+🧩 [Plataforma (repo principal)](https://github.com/renatojuniordw/radar-unificando)
+
 ## Funcionalidades
 
 - **Side Panel** — painel lateral persistente; abre com um clique no ícone.
@@ -23,6 +27,8 @@ Reaproveita a análise ATS do backend do Radar Unificando
 - **Cache por hash do conteúdo** — evita re-analisar a mesma vaga por 30
   minutos (chave é o hash do texto extraído, não a URL — SPAs trocam a vaga
   sem mudar o endereço).
+- **Cursos recomendados** — sugestões da Udemy para fechar as skills que
+  faltam, exibidas junto com o resultado da análise.
 - **Copiar dicas** — exporta o resultado como texto formatado.
 - **Feedback de utilidade** — avaliação (sim/não) enviada ao backend.
 - **Extratores por site** — LinkedIn, Gupy, InHire e um extrator genérico.
