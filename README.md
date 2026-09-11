@@ -12,6 +12,9 @@ Reaproveita a análise ATS do backend do Radar Unificando
 📖 [Guia da extensão](https://radar.unificando.com.br/extensao) ·
 🧩 [Plataforma (repo principal)](https://github.com/renatojuniordw/radar-unificando)
 
+![Side Panel analisando vaga no LinkedIn](screenshots/side-panel-linkedin-1.jpg)
+![Side Panel com score por skill no LinkedIn](screenshots/side-panel-linkedin-2.jpg)
+
 ## Funcionalidades
 
 - **Side Panel** — painel lateral persistente; abre com um clique no ícone.
@@ -32,6 +35,8 @@ Reaproveita a análise ATS do backend do Radar Unificando
 - **Copiar dicas** — exporta o resultado como texto formatado.
 - **Feedback de utilidade** — avaliação (sim/não) enviada ao backend.
 - **Extratores por site** — LinkedIn, Gupy, InHire e um extrator genérico.
+
+![Side Panel analisando vaga no Gupy, com score por skill](screenshots/side-panel-gupy.jpg)
 
 ## Como funciona
 
